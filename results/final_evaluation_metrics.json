@@ -1,0 +1,8 @@
+{
+    "Accuracy_PA": 0.9115,
+    "F1_Score_PA": 0.7116,
+    "Precision_PA": 0.9827,
+    "Recall_PA": 0.5577,
+    "ROC_AUC": 0.569,
+    "Threshold": 0.97
+}
