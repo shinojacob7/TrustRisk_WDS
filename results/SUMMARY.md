@@ -5,7 +5,7 @@ The GNN-GRU model was evaluated using the Point-Adjusted (PA) metric, which is t
 
 ### 1. Validation Set (The 0.97+ Target)
 As noted by the LightEdge-IDS authors, their reported `0.97+` F1 score was achieved on a time-ordered held-out split of the training zone data. Our model successfully surpassed this baseline on the identical methodology:
-- **Validation F1-Score (PA):** `0.9861` (Exceeds the 0.9700 target!)
+- **Validation F1-Score (PA):** `0.9861` 
 - **Optimal Threshold:** `0.9700`
 
 ### 2. Zero-Day BATADAL Test Set

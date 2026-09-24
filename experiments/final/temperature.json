@@ -1,0 +1,9 @@
+{
+    "Optimal_Temperature": 1.49,
+    "NLL_Uncalibrated": 0.2455,
+    "NLL_Calibrated": 0.2131,
+    "Brier_Uncalibrated": 0.0605,
+    "Brier_Calibrated": 0.0569,
+    "ECE_Uncalibrated": 0.0524,
+    "ECE_Calibrated": 0.03
+}

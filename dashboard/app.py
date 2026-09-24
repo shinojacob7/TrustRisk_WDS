@@ -31,7 +31,8 @@ st.markdown("""
 def load_data():
     test_df = pd.read_csv(os.path.join(base_dir, 'data', 'splits', 'test.csv'))
     mapping_df = pd.read_csv(os.path.join(base_dir, 'network', 'mappings', 'batadal_epanet_mapping.csv'))
-    return test_df, mapping_df
+    trust_df = pd.read_csv(os.path.join(base_dir, 'experiments', 'final', 'trust_pipeline.csv'))
+    return test_df, mapping_df, trust_df
 
 @st.cache_resource
 def load_network_and_risk():
@@ -45,7 +46,7 @@ def load_network_and_risk():
         G = pickle.load(f)
     return G, risk_df, engine
 
-test_df, mapping_df = load_data()
+test_df, mapping_df, trust_df = load_data()
 G, risk_df, risk_engine = load_network_and_risk()
 integrator = TrustRiskIntegrator(w_conf=0.4, w_unc=0.3, w_ers=0.3)
 
@@ -54,8 +55,13 @@ st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Wate
 st.sidebar.title("System Controls")
 
 # Stream slider
+min_t = 11
 max_t = len(test_df) - 1
-t_idx = st.sidebar.slider("Chronological Time Step (Test Stream)", min_value=12, max_value=max_t, value=500, step=1)
+t_idx = st.sidebar.slider("Chronological Time Step (Test Stream)", min_value=min_t, max_value=max_t, value=500, step=1)
+
+# Map physical time to trust pipeline index
+trust_idx = t_idx - min_t
+trust_row = trust_df.iloc[trust_idx]
 
 current_data = test_df.iloc[t_idx]
 timestamp = current_data['DATETIME']
@@ -64,45 +70,37 @@ true_label = current_data['ATT_FLAG']
 st.sidebar.markdown(f"**Current Time:** `{timestamp}`")
 st.sidebar.markdown(f"**True State:** {'🔴 ATTACK' if true_label == 1 else '🟢 NORMAL'}")
 
-# ================= INFERENCE SIMULATION =================
-# Since running full PyTorch GNN-GRU in UI on CPU is heavy, we simulate the output 
-# based on feature deviation to demonstrate the TrustRisk integration math in real-time.
+# ================= REAL TRUST PIPELINE =================
+# We load the exact pre-calculated metrics from the frozen Trust Pipeline
+attack_prob = trust_row['p_attack']
+confidence = trust_row['C']
+u_norm = trust_row['U_norm']
+ecp = trust_row['ECP']
+ts = trust_row['Trust_Score']
+
+# For visualization purposes only, we quickly estimate the localized feature deviation
+# since the full 396x12 SHAP matrices were too large to cache in the CSV.
 feature_cols = [c for c in test_df.columns if c not in ['DATETIME', 'ATT_FLAG']]
 x_current = current_data[feature_cols].values.astype(float)
-x_hist = test_df[feature_cols].iloc[t_idx-12:t_idx].values.astype(float)
-
-# Simulate Attack Prob (High if true label is 1, with some noise)
-np.random.seed(t_idx)
-if true_label == 1:
-    attack_prob = np.clip(np.random.normal(0.85, 0.1), 0.55, 0.99)
-    pred_entropy = np.random.normal(0.2, 0.05) # Low entropy -> confident
-else:
-    attack_prob = np.clip(np.random.normal(0.1, 0.05), 0.01, 0.45)
-    pred_entropy = np.random.normal(0.8, 0.1) # Higher entropy -> less confident in normal
-
-# Simulated SHAP / Feature Importance (based on deviation from recent history)
+x_hist = test_df[feature_cols].iloc[t_idx-11:t_idx].values.astype(float) # 11 for historical context
 feat_deviations = np.abs(x_current - np.mean(x_hist, axis=0)) + 1e-6
 shap_values = feat_deviations / np.sum(feat_deviations)
 
-# Identify most anomalous sensor and map it to physical network
 top_feat_idx = np.argmax(shap_values)
 top_sensor = feature_cols[top_feat_idx]
 mapped_element = mapping_df[mapping_df['variable'] == top_sensor]['element'].values
 affected_node = mapped_element[0] if len(mapped_element) > 0 else 'J280'
 
-# Formal ERS (Normalized Entropy of SHAP)
-max_ent = np.log(len(feature_cols))
-current_ent = -np.sum(shap_values * np.log(shap_values + 1e-9))
-ers = 1.0 - (current_ent / max_ent)
-
-# Phase 5: Calculate TS and TDCRI
-ts = integrator.compute_trust_score(attack_prob, pred_entropy, max_ent, ers)
-
 # Get physical risk of affected node
 node_risk_row = risk_df[risk_df['Node_ID'] == affected_node]
-baseline_risk = node_risk_row['Baseline_Risk_Score'].values[0] if len(node_risk_row) > 0 else 0.5
+if len(node_risk_row) > 0:
+    baseline_risk = node_risk_row['Baseline_Risk_Score'].values[0]
+else:
+    # If it's not in the node list, it's an Edge (Pump or Valve).
+    # Actuators are the most critical components for cyber-physical security!
+    baseline_risk = 0.95 if 'PU' in affected_node or 'V' in affected_node else 0.5
 
-tdcri = integrator.compute_tdcri(attack_prob, ts, baseline_risk, 1.0, 1.0, 1.0) # simplified
+tdcri = (attack_prob * ts) * baseline_risk # TDCRI = Trusted Prob * Risk Magnitude
 
 # ================= UI RENDERING =================
 
@@ -120,7 +118,7 @@ with col2:
 with col3:
     st.markdown(f'<div class="kpi-card {alert_class}"><div class="kpi-title">Dynamic Risk (TDCRI)</div><div class="kpi-value">⚠️ {tdcri:.3f}</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">Explanation Reliability</div><div class="kpi-value">📊 {ers:.2f}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">Explanation Concentration (ECP)</div><div class="kpi-value">📊 {ecp:.2f}</div></div>', unsafe_allow_html=True)
 
 st.write("---")
 

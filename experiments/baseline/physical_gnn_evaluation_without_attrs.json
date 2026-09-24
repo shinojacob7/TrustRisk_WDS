@@ -1,0 +1,25 @@
+{
+    "Ablation_Physical_Attrs": false,
+    "Accuracy_PA": 0.9423,
+    "F1_Score_PA": 0.8365,
+    "Precision_PA": 0.9388,
+    "Recall_PA": 0.7543,
+    "ROC_AUC": 0.6944,
+    "PR_AUC": 0.4368,
+    "Event_Detection_Rate": 0.7143,
+    "Detected_Events": 5,
+    "Total_Events": 7,
+    "Mean_Detection_Delay": 23.8,
+    "False_Alarm_Events": 5,
+    "Confusion_Matrix": [
+        [
+            1651,
+            20
+        ],
+        [
+            100,
+            307
+        ]
+    ],
+    "Threshold": 0.97
+}

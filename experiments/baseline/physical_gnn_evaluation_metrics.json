@@ -1,0 +1,24 @@
+{
+    "Accuracy_PA": 0.1959,
+    "F1_Score_PA": 0.3276,
+    "Precision_PA": 0.1959,
+    "Recall_PA": 1.0,
+    "ROC_AUC": 0.6069,
+    "PR_AUC": 0.3844,
+    "Event_Detection_Rate": 1.0,
+    "Detected_Events": 7,
+    "Total_Events": 7,
+    "Mean_Detection_Delay": 0.0,
+    "False_Alarm_Events": 8,
+    "Confusion_Matrix": [
+        [
+            0,
+            1671
+        ],
+        [
+            0,
+            407
+        ]
+    ],
+    "Threshold": 0.01
+}
