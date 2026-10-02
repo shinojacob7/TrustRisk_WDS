@@ -59,6 +59,10 @@ min_t = 11
 max_t = len(test_df) - 1
 t_idx = st.sidebar.slider("Chronological Time Step (Test Stream)", min_value=min_t, max_value=max_t, value=500, step=1)
 
+# Add explicit Demonstration Mode toggle
+st.sidebar.markdown("---")
+demo_mode = st.sidebar.checkbox("🧪 Enable Demonstration Mode (Oracle)", value=False, help="Injects synthetic probabilities to demonstrate TPPI optimization during attacks. DO NOT use for model evaluation.")
+
 # Map physical time to trust pipeline index
 trust_idx = t_idx - min_t
 trust_row = trust_df.iloc[trust_idx]
@@ -77,6 +81,16 @@ confidence = trust_row['C']
 u_norm = trust_row['U_norm']
 ecp = trust_row['ECP']
 ts = trust_row['Trust_Score']
+
+# If Demonstration Mode is ON, we use an Oracle to force the dashboard to react
+if demo_mode and true_label == 1:
+    import numpy as np
+    np.random.seed(t_idx)
+    attack_prob = np.clip(np.random.normal(0.85, 0.1), 0.55, 0.99)
+    # Recalculate TS for the demonstration
+    confidence = max(attack_prob, 1 - attack_prob)
+    ts = confidence * (1 - u_norm) * ecp
+    st.warning("⚠️ **DEMONSTRATION MODE — NOT MODEL EVALUATION**\n\nAttack probability is synthetically generated using the ground-truth attack state to demonstrate downstream Trust → Risk → TDCRI → TPPI behavior. Metrics shown here must not be reported as IDS performance.")
 
 # For visualization purposes only, we quickly estimate the localized feature deviation
 # since the full 396x12 SHAP matrices were too large to cache in the CSV.
@@ -206,3 +220,28 @@ if is_attack:
     st.dataframe(df_opt, use_container_width=True)
 else:
     st.success("System Operating Normally. No immediate security optimization required.")
+
+
+# ================= GLOBAL EVALUATION METRICS =================
+st.write("---")
+st.subheader("📈 Evaluation Metrics — Frozen Real Model Results")
+st.markdown("These metrics represent the genuine, independent performance of the PyTorch GNN-GRU on the test set (2,078 hours). They are immutable and uninfluenced by Demonstration Mode.")
+
+# Calculate global metrics natively from the loaded trust_df (which is uncorrupted by demo_mode)
+pred_global = (trust_df['p_attack'] > 0.5).astype(int)
+tn_g, fp_g, fn_g, tp_g = __import__('sklearn').metrics.confusion_matrix(trust_df['true_label'], pred_global).ravel()
+prec_g = __import__('sklearn').metrics.precision_score(trust_df['true_label'], pred_global, zero_division=0)
+rec_g = __import__('sklearn').metrics.recall_score(trust_df['true_label'], pred_global, zero_division=0)
+f1_g = __import__('sklearn').metrics.f1_score(trust_df['true_label'], pred_global, zero_division=0)
+
+m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+m_col1.metric("True Positives (TP)", tp_g)
+m_col2.metric("False Positives (FP)", fp_g)
+m_col3.metric("False Negatives (FN)", fn_g)
+m_col4.metric("True Negatives (TN)", tn_g)
+
+m_col5, m_col6, m_col7, m_col8 = st.columns(4)
+m_col5.metric("Precision", f"{prec_g*100:.2f}%")
+m_col6.metric("Recall", f"{rec_g*100:.2f}%")
+m_col7.metric("F1 Score", f"{f1_g*100:.2f}%")
+m_col8.metric("Accuracy", f"{(tp_g+tn_g)/len(trust_df)*100:.2f}%")
