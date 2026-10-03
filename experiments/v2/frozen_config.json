@@ -1,15 +1,13 @@
 {
     "regime": "DS04-999-only",
-    "score_variant": "top3_mean_z",
+    "score": "top3_mean_z",
     "lags": 1,
     "quantile": 99.9,
-    "persistence": "3/6",
-    "cusum_params": {
-        "k": "mean",
-        "h_multiplier": 2.0
-    },
-    "ewma_params": {
-        "span": 12
-    },
-    "masked_clusters": []
+    "rule": "CUSUM",
+    "k": "inner_cv",
+    "h": "inner_cv",
+    "span": "N/A",
+    "weights": "none",
+    "threshold_procedure": "Inner OOF scores of training normals",
+    "final_training_set": "All DS04 -999 rows"
 }
