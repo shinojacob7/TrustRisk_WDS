@@ -1,0 +1,28 @@
+{
+    "Threshold": 0.86,
+    "Pointwise_CM": [
+        1671,
+        0,
+        399,
+        8
+    ],
+    "Pointwise_Precision": 1.0,
+    "Pointwise_Recall": 0.0197,
+    "Pointwise_F1": 0.0386,
+    "ROC_AUC": 0.6827,
+    "PR_AUC": 0.4649,
+    "PA_CM": [
+        1671,
+        0,
+        376,
+        31
+    ],
+    "PA_Precision": 1.0,
+    "PA_Recall": 0.0762,
+    "PA_F1": 0.1416,
+    "Event_Detection_Rate": 0.1429,
+    "Detected_Events": 1,
+    "Total_Events": 7,
+    "False_Alarm_Events": 0,
+    "Mean_Detection_Delay": 10.0
+}

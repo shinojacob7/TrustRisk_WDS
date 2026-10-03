@@ -1,0 +1,99 @@
+{
+    "configuration": "Observation-Masked Mean Pooling (Exp E1), WeightedRandomSampler, Same LR/Optimizer",
+    "validation_metrics": {
+        "Precision": 0.9340659340659341,
+        "Recall": 0.96045197740113,
+        "F1": 0.947075208913649,
+        "PR_AUC": 0.6171997524195736,
+        "ROC_AUC": 0.8958829281050413,
+        "selected_threshold": 0.98
+    },
+    "baseline_comparison": {
+        "delta_Precision": -0.005134065934065957,
+        "delta_Recall": -4.802259887004556e-05,
+        "delta_F1": -0.0026247910863509416,
+        "delta_PR_AUC": 0.07989975241957359,
+        "delta_ROC_AUC": 0.03868292810504137,
+        "delta_threshold": 0.12
+    },
+    "event_level_validation": [
+        {
+            "event_id": 1,
+            "duration_frames": 60,
+            "max_prob": 0.9982483386993408,
+            "mean_prob": 0.22626233100891113,
+            "detected": true,
+            "detection_delay": 28
+        },
+        {
+            "event_id": 2,
+            "duration_frames": 37,
+            "max_prob": 0.9970417618751526,
+            "mean_prob": 0.13759198784828186,
+            "detected": true,
+            "detection_delay": 18
+        },
+        {
+            "event_id": 3,
+            "duration_frames": 7,
+            "max_prob": 0.00010791735257953405,
+            "mean_prob": 4.8205885832430795e-05,
+            "detected": false,
+            "detection_delay": -1
+        },
+        {
+            "event_id": 4,
+            "duration_frames": 73,
+            "max_prob": 0.9985456466674805,
+            "mean_prob": 0.9055125713348389,
+            "detected": true,
+            "detection_delay": 4
+        }
+    ],
+    "threshold_sweep_near_optimum": [
+        {
+            "threshold": 0.93,
+            "F1": 0.9366,
+            "Precision": 0.914,
+            "Recall": 0.9605
+        },
+        {
+            "threshold": 0.94,
+            "F1": 0.9366,
+            "Precision": 0.914,
+            "Recall": 0.9605
+        },
+        {
+            "threshold": 0.95,
+            "F1": 0.9366,
+            "Precision": 0.914,
+            "Recall": 0.9605
+        },
+        {
+            "threshold": 0.96,
+            "F1": 0.9366,
+            "Precision": 0.914,
+            "Recall": 0.9605
+        },
+        {
+            "threshold": 0.97,
+            "F1": 0.9392,
+            "Precision": 0.9189,
+            "Recall": 0.9605
+        },
+        {
+            "threshold": 0.98,
+            "F1": 0.9471,
+            "Precision": 0.9341,
+            "Recall": 0.9605
+        }
+    ],
+    "sanity_checks": {
+        "Exactly_19_nodes_contribute": true,
+        "Denominator_is_observed_nodes": true,
+        "No_NaN_produced": true,
+        "No_label_alteration": true,
+        "No_test_data_used": true,
+        "No_dashboard_modification": true
+    }
+}

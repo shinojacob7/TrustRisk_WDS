@@ -157,7 +157,7 @@ def run_trust_pipeline():
         'Trust_Score': TS
     })
     
-    out_path = os.path.join(base_dir, 'experiments', 'final', 'trust_pipeline.csv')
+    out_path = os.path.join(base_dir, 'experiments', 'final', 'trust_pipeline_virgin.csv')
     df_trust.to_csv(out_path, index=False)
     
     print(f"Saved complete auditable Trust pipeline to {out_path}")

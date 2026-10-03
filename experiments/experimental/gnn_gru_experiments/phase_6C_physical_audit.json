@@ -1,0 +1,49 @@
+{
+    "feature_scaling": {
+        "node_features": {
+            "measurement": "Scaled (StandardScaler on train), heavily diluted by 377 unobserved 0-pads (std=0.219)",
+            "observation_mask": "Unscaled (Binary 0/1)",
+            "elevation": "Scaled (Static mean/std normalization)",
+            "has_elevation": "Unscaled (Binary 0/1)"
+        },
+        "edge_features": {
+            "flow": "Scaled (StandardScaler on train)",
+            "status": "Unscaled (Binary 0/1)",
+            "length": "Scaled (Static mean/std normalization)",
+            "diameter": "Scaled (Static mean/std normalization)",
+            "roughness": "Scaled (Static mean/std normalization)"
+        },
+        "scaling_leakage": "None. StandardScaler strictly fit on train_df. Topology scaling is static."
+    },
+    "mask_behavior": {
+        "is_input_feature": true,
+        "controls_propagation": false,
+        "controls_pooling": false,
+        "unobserved_nodes_dominate": true
+    },
+    "edge_feature_behavior": {
+        "layer_integration": "torch.cat([x_src, x_dst, edge_attr], dim=-1)",
+        "silent_drops": false,
+        "ordering": "Deterministic (ctown_edge_index.csv)"
+    },
+    "pooling_readout_behavior": {
+        "operation": "x_pooled = x_gnn.mean(dim=2)",
+        "type": "Global Mean Pooling",
+        "dilution_factor": "1/396 (0.25% per node)",
+        "vulnerability": "Localized attack anomalies on 1-2 observed nodes are massively diluted by the 377 unobserved nodes during the mean operation."
+    },
+    "temporal_window_configuration": {
+        "length": 12,
+        "stride": 1,
+        "target_alignment": "Predicts label of the final frame in the window (t)",
+        "consistency": "Identical across train/val/test splits"
+    },
+    "identified_issues": [
+        {
+            "issue": "Severe Graph Readout Dilution",
+            "description": "The model uses a global mean pool over 396 nodes, but only 19 nodes have actual sensor data. An extreme anomaly at 1 sensor is divided by 396, rendering it invisible to the GRU as normal operational noise.",
+            "severity": "HIGH"
+        }
+    ],
+    "recommended_next_experiment": "Phase 6H: Replace mean(dim=2) with Max Pooling or Mean+Max Pooling to preserve localized attack spikes."
+}

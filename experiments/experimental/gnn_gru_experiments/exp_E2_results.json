@@ -1,0 +1,91 @@
+{
+    "configuration": "Observation-Masked Max Pooling (Exp E2), Negative Penalty applied to unobserved nodes.",
+    "validation_metrics": {
+        "Precision": 0.9326923076923077,
+        "Recall": 0.5480225988700564,
+        "F1": 0.6903914590747331,
+        "PR_AUC": 0.28437315408041164,
+        "ROC_AUC": 0.8101653307655501,
+        "selected_threshold": 0.98
+    },
+    "event_level_validation": [
+        {
+            "event_id": 1,
+            "duration_frames": 60,
+            "max_prob": 0.995344340801239,
+            "mean_prob": 0.17347732186317444,
+            "detected": true,
+            "detection_delay": 49
+        },
+        {
+            "event_id": 2,
+            "duration_frames": 37,
+            "max_prob": 0.98520827293396,
+            "mean_prob": 0.1140081137418747,
+            "detected": true,
+            "detection_delay": 19
+        },
+        {
+            "event_id": 3,
+            "duration_frames": 7,
+            "max_prob": 9.644608326198068e-06,
+            "mean_prob": 7.297677711903816e-06,
+            "detected": false,
+            "detection_delay": -1
+        },
+        {
+            "event_id": 4,
+            "duration_frames": 73,
+            "max_prob": 2.6855579562834464e-05,
+            "mean_prob": 8.963419531937689e-06,
+            "detected": false,
+            "detection_delay": -1
+        }
+    ],
+    "threshold_sweep_near_optimum": [
+        {
+            "threshold": 0.93,
+            "F1": 0.6831,
+            "Precision": 0.9065,
+            "Recall": 0.548
+        },
+        {
+            "threshold": 0.94,
+            "F1": 0.6831,
+            "Precision": 0.9065,
+            "Recall": 0.548
+        },
+        {
+            "threshold": 0.95,
+            "F1": 0.6831,
+            "Precision": 0.9065,
+            "Recall": 0.548
+        },
+        {
+            "threshold": 0.96,
+            "F1": 0.6831,
+            "Precision": 0.9065,
+            "Recall": 0.548
+        },
+        {
+            "threshold": 0.97,
+            "F1": 0.6855,
+            "Precision": 0.9151,
+            "Recall": 0.548
+        },
+        {
+            "threshold": 0.98,
+            "F1": 0.6904,
+            "Precision": 0.9327,
+            "Recall": 0.548
+        }
+    ],
+    "sanity_checks": {
+        "Exactly_19_nodes_contribute": true,
+        "Unobserved_nodes_avoided": true,
+        "No_NaN_produced": true,
+        "No_label_alteration": true,
+        "No_test_data_used": true,
+        "No_dashboard_modification": true
+    }
+}
