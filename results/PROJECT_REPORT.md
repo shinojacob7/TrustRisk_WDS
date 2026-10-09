@@ -1,7 +1,7 @@
-# TrustRisk-WDS: Project Update & Output Report
+# TrustRisk-WDS
 TrustRisk-WDS is a security framework for Smart Water Distribution Systems (SWDS). It uses formal physical topology modeling combined with an AI-based intrusion detection layer (GNN-GRU) and a dynamic trust layer. This provides operators with validated alerts, structural risk indices, and actionable decision-support for resource allocation, moving beyond standard binary anomaly detection.
 
-Last updated 2026-10-09 | Dataset: BATADAL (C-Town) | Status: Experimental Evaluation Phase
+Dataset: BATADAL (C-Town) | Status: Experimental Evaluation Phase
 
 ## 1. Project overview
 TrustRisk-WDS evaluates the cyber-physical risk in water networks by identifying anomalies and assessing their cascading topological impact. It addresses the challenge of untrustworthy 'black-box' alarms by appending confidence, uncertainty, and physical consequence metrics to every alert.
