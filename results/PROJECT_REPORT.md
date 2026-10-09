@@ -171,24 +171,7 @@ The Streamlit dashboard (`dashboard/app.py`) provides an interactive simulation 
 ![TPPI Optimization](report_figures/dashboard_tppi.png)
 *When an attack is confirmed, the 0/1 Knapsack Optimizer dynamically recommends security resource allocation based on mitigated risk indices (TDCRI) versus deployment costs.*
 
-## 9. Project timeline and repository status
-| Date | Commit | What changed |
-| :--- | :--- | :--- |
-| 2026-10-03 | 5c5b100 | Add cv_report and freeze config |
-| 2026-10-03 | 9f86434 | Freeze V2 configuration |
-| 2026-10-03 | 6bf0b8a | Phase 6C-6K: Architecture modifications (Masked Mean E1), temporal sweep results |
-| 2026-10-02 | c34cd20 | Freeze corrupted codebase before virgin baseline generation |
-| 2026-09-24 | 561cea1 | feat: implement full TrustRisk pipeline and finalize decision-support dashboard |
-| 2026-08-27 | eb0c825 | Initial commit |
-
-**Known Repo-Hygiene Issues:**
-1. Stray root scripts polluting the working directory (`patch_modes.py`, `debug_shap.py`, etc.).
-2. Multiple model checkpoints in `models/gnn_gru/` and `experiments/final/` lacking a clear canonical mapping.
-3. Hard-coded absolute paths found in `patch_modes.py`, `restore_real.py`, and `update_dashboard.py`.
-4. Missing test coverage (the solitary `evaluate_real_test.py` errors out on an invalid import).
-5. The `README.md` training command points to `models/gnn_gru/train_gnn_gru.py` which does not exist.
-
-## 10. Limitations and validity threats
+## 9. Limitations and validity threats
 1. **Validation-Test Gap:** Large discrepancy between Val F1 (0.947) and Test F1 (0.836), suggesting overfitting.
 2. **PA-Metric Inflation:** Point-Adjusted metrics vastly inflate standard point-wise evaluation scores.
 3. **Threshold Selection:** Thresholding on very small event counts (4-7) lacks statistical significance.
@@ -198,14 +181,14 @@ The Streamlit dashboard (`dashboard/app.py`) provides an interactive simulation 
 7. **Duplicate Definitions:** Multiple and sometimes conflicting trust score formulations across the codebase.
 8. **Post-Processing Scripts:** Several scripts directly patch outputs and must be carefully excluded from metric pipelines.
 
-## 11. Key takeaways
+## 10. Key takeaways
 * Masked Mean Pooling (Exp E1) resolves graph-readout dilution from unmonitored nodes, improving PR-AUC from 0.537 to 0.617 compared to standard collapse.
 * Increasing the temporal window beyond W=12 drastically reduces recall (from 0.96 at W=12 to 0.54 at W=24/36).
 * The physical attribute ablation study shows that dropping the explicit physical inputs boosts PA F1 from 0.7096 to 0.8365 on the test set.
 * Calibration via Temperature Scaling successfully reduces Expected Calibration Error (ECE) from 0.0528 to 0.0469.
 * Short-duration attacks (like Event 3, lasting only 7 frames) entirely evade temporal detection models regardless of window sizing.
 
-## 12. Repository structure
+## 11. Repository structure
 ```text
 TrustRisk_WDS/
 |-- data/             # Chronological CSV splits (train, val, test)
@@ -227,14 +210,14 @@ TrustRisk_WDS/
 `-- trust/            # SHAP and MC-Dropout engines
 ```
 
-## 13. Running the project
+## 12. Running the project
 * **Install:** `pip install -r requirements.txt` (Verified)
 * **Data build:** `python preprocessing/build_dataset.py` (Verified)
 * **Train:** `python models/gnn_gru/train_final.py` (Verified file exists; README is incorrect)
 * **Evaluate:** `python models/gnn_gru/evaluate_real_test.py` (Errors out: ModuleNotFoundError)
 * **Dashboard:** `streamlit run dashboard/app.py` (Verified)
 
-## 14. Artifact index
+## 13. Artifact index
 | Artifact | Path | Description |
 | :--- | :--- | :--- |
 | Test Baseline | `experiments/baseline/physical_gnn_evaluation_without_attrs.json` | Headline test metrics (PA F1=0.8365) |
@@ -244,21 +227,7 @@ TrustRisk_WDS/
 | Trust Timeline | `results/report_figures/trust_score_timeline.png` | P(Attack) and Trust Score trace |
 | Final Predictions | `experiments/final/trust_pipeline_virgin.csv` | Raw logits, uncertainties, and ECP output |
 
-## 15. Roadmap
-1. Fix evaluation protocol with event-level cross-validation to remove post-hoc bias.
-2. Establish one canonical `.pth` checkpoint and delete redundant weights.
-3. Re-test physical-attribute ablation strictly across all validation folds.
-4. Apply the E1 (Masked Mean) readout and W=12 hyperparameter combination officially on the test set.
-5. Add explicit pump/valve/flow proxy features to mitigate blind-spot attacks on unmonitored nodes.
-6. Validate the hard-coded heuristic trust weights mathematically against true utility impact costs.
-7. Conduct full repository cleanup (remove root stray scripts, fix absolute paths, update README).
-8. Prepare final paper submission and slide deck.
-
-## 16. Items to verify
-* Precise point-wise F1 metrics for the exact headline checkpoint (currently absent from JSON files).
-* Exact correlation between `virgin_baseline_metrics.json` and the final ablation configuration JSONs.
-
-## 17. Summary
+## 14. Summary
 The TrustRisk-WDS project successfully delivers an end-to-end cyber-physical security framework that moves beyond binary intrusion detection by appending rigorous, physics-aware trust and impact bounds to its outputs. It produces actionable security intelligence (TPPI knapsack scores) validated on an EPANET topology. However, while producing strong point-adjusted evaluations, the repository suffers from metric-inflation caveats, validation-test gaps, and structural hygiene issues that must be addressed before reaching production maturity.
 
 ---
