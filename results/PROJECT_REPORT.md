@@ -1,6 +1,4 @@
-import os
-
-report_content = """# TrustRisk-WDS: Project Update & Output Report
+# TrustRisk-WDS: Project Update & Output Report
 TrustRisk-WDS is a security framework for Smart Water Distribution Systems (SWDS). It uses formal physical topology modeling combined with an AI-based intrusion detection layer (GNN-GRU) and a dynamic trust layer. This provides operators with validated alerts, structural risk indices, and actionable decision-support for resource allocation, moving beyond standard binary anomaly detection.
 
 Last updated 2026-10-09 | Dataset: BATADAL (C-Town) | Status: Experimental Evaluation Phase
@@ -264,7 +262,3 @@ TrustRisk_WDS/
 The TrustRisk-WDS project successfully delivers an end-to-end cyber-physical security framework that moves beyond binary intrusion detection by appending rigorous, physics-aware trust and impact bounds to its outputs. It produces actionable security intelligence (TPPI knapsack scores) validated on an EPANET topology. However, while producing strong point-adjusted evaluations, the repository suffers from metric-inflation caveats, validation-test gaps, and structural hygiene issues that must be addressed before reaching production maturity.
 
 ---
-"""
-
-with open("results/PROJECT_REPORT.md", "w", encoding="utf-8") as f:
-    f.write(report_content)
