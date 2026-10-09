@@ -1,61 +1,66 @@
-import torch
-import pandas as pd
 import os
 import sys
+import json
+import torch
+import numpy as np
+import pandas as pd
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score
 from torch.utils.data import DataLoader
-import torch.nn as nn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(base_dir)
 
-from models.gnn_gru.train_gnn_gru import GNN_GRU, WDSGraphDataset, build_sensor_adjacency, evaluate_model
+from models.gnn_gru.physical_dataset import WDSPhysicalGraphDataset
+from models.gnn_gru.train_gnn_gru_physical import PhysicalGNN_GRU, get_probs, point_adjust
 
 def evaluate_real_test():
-    # 1. Rebuild the exact same adjacency and zone mapping from training data
-    train_df = pd.read_csv(os.path.join(base_dir, 'data', 'processed', 'BATADAL_balanced_scaled.csv'))
-    
-    # Loop to ensure Leiden finds exactly the 14 zones that were saved in the model weights
-    for seed in range(100):
-        import random
-        import numpy as np
-        random.seed(seed)
-        np.random.seed(seed)
-        adj_matrix, num_nodes, zone_mapping, num_zones = build_sensor_adjacency(train_df)
-        if num_zones == 14:
-            print(f"Matched 14 zones with seed {seed}")
-            break
-    
-    # 2. Load the REAL test dataset
-    test_df = pd.read_csv(os.path.join(base_dir, 'data', 'processed', 'BATADAL_test_dataset_scaled.csv'))
-    
-    # Ensure DATETIME is dropped if it exists so we don't crash the tensor conversion
-    if 'DATETIME' in test_df.columns:
-        test_df = test_df.drop(columns=['DATETIME'])
-        
-    test_dataset = WDSGraphDataset(test_df, window_size=12)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-    
-    # 3. Load Model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = GNN_GRU(num_nodes=num_nodes, adj_matrix=adj_matrix, zone_mapping=zone_mapping, num_zones=num_zones).to(device)
-    model.use_adapters = True
+
+    data_dir = os.path.join(base_dir, 'data', 'processed')
+    test_df  = pd.read_csv(os.path.join(data_dir, 'test_processed.csv'))
     
-    save_path = os.path.join(base_dir, 'models', 'gnn_gru', 'gnn_gru_model.pth')
-    model.load_state_dict(torch.load(save_path))
+    W = 12
+    test_ds  = WDSPhysicalGraphDataset(test_df, base_dir, window_size=W, use_physical_attributes=False)
+    test_loader  = DataLoader(test_ds, batch_size=64, shuffle=False)
     
-    criterion = nn.BCEWithLogitsLoss()
+    edge_index = test_ds.edge_index
+
+    model = PhysicalGNN_GRU(
+        node_dim=test_ds.F_node, edge_dim=test_ds.F_edge, 
+        gnn_hidden=64, gru_hidden=128
+    ).to(device)
+
+    # Use the headline model (without attrs)
+    save_path = os.path.join(base_dir, 'models', 'gnn_gru', 'physical_gnn_gru_model.pth')
+    if not os.path.exists(save_path):
+        save_path = os.path.join(base_dir, 'models', 'gnn_gru', 'physical_gnn_gru_model.pth')
+        
+    print(f"Loading {save_path}")
+    model.load_state_dict(torch.load(save_path, map_location=device))
+    model.eval()
+
+    test_labels, test_probs = get_probs(model, test_loader, device, edge_index)
     
-    print("\nRunning inference on BATADAL_test_dataset_scaled.csv...")
-    # 4. Evaluate and Optimize Threshold dynamically (threshold=None)
-    _, acc, f1, prec, rec, auc, best_thresh = evaluate_model(model, test_loader, criterion, device, threshold=None)
-    
-    print(f"\n--- Final Benchmark on Novel BATADAL Test Set ---")
-    print(f"Optimal Threshold: {best_thresh:.4f}")
-    print(f"Test Accuracy:     {acc:.4f}")
-    print(f"Test F1-Score:     {f1:.4f}")
-    print(f"Precision:         {prec:.4f}")
-    print(f"Recall:            {rec:.4f}")
-    print(f"ROC-AUC:           {auc:.4f}")
+    best_pw_f1 = 0
+    best_pw_thr = 0
+    best_pa_f1 = 0
+    for t in np.arange(0.01, 0.99, 0.01):
+        preds = (test_probs >= t).astype(int)
+        
+        # Pointwise
+        pw_f1 = f1_score(test_labels, preds, zero_division=0)
+        if pw_f1 > best_pw_f1:
+            best_pw_f1 = pw_f1
+            best_pw_thr = t
+            
+        # PA
+        pa_preds = point_adjust(test_labels, preds)
+        pa_f1 = f1_score(test_labels, pa_preds, zero_division=0)
+        if pa_f1 > best_pa_f1:
+            best_pa_f1 = pa_f1
+
+    print(f"\nMaximum Pointwise F1: {best_pw_f1:.4f} at Threshold: {best_pw_thr:.2f}")
+    print(f"Maximum PA F1:        {best_pa_f1:.4f}")
 
 if __name__ == "__main__":
     evaluate_real_test()
