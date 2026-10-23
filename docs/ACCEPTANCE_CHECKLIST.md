@@ -34,7 +34,7 @@ In accordance with Section 2 (Phase G) of the Master Prompt and Task 3.6 revisio
 ### - [x] Criterion 2: Single-Shot Quarantined Test Evaluation
 - **Status**: **MET**
 - **Commits**: [`7090278`](https://github.com/shinojacob7/TrustRisk_WDS/commit/7090278) & [`91a1dfd`](https://github.com/shinojacob7/TrustRisk_WDS/commit/91a1dfd)
-- **Description**: Primary detector hyperparameters, threshold ($q=99.0$), and 3-of-6 persistence rule were strictly frozen in `frozen_config.json` before first test exposure. Rerun blockers in `experiments/v3_residual/run_test_once.py` and `experiments/run_core_triage_experiment.py` require `--confirm-test-use` and lock report files. All downstream trust weights ($0.45, 0.35, 0.20$) and Policy 3 cutoff ($0.85$) were selected exclusively via 5-fold cross-validation on Dataset 04 in `experiments/run_triage_cv.py` before single-shot test scoring.
+- **Description**: Primary detector hyperparameters, threshold ($q=99.0$), and 3-of-6 persistence rule were strictly frozen in `frozen_config.json` before first test exposure. Rerun blockers in `experiments/v3_residual/run_test_once.py` and `experiments/run_core_triage_experiment.py` require `--confirm-test-use` and lock report files. All downstream trust weights ($0.30, 0.40, 0.30$) and Policy 3 cutoff ($0.85$) were selected exclusively via 5-fold cross-validation on Dataset 04 in `experiments/run_triage_cv.py` before single-shot test scoring.
 - **Verification Command**:
   ```bash
   git log --oneline frozen_config.json results/v3/test_report.json
@@ -123,7 +123,7 @@ In accordance with Section 2 (Phase G) of the Master Prompt and Task 3.6 revisio
 ### - [x] Criterion 6: Phase 5 Headline Table Quoted in Abstract with CIs
 - **Status**: **MET**
 - **Commits**: [`115e24f`](https://github.com/shinojacob7/TrustRisk_WDS/commit/115e24f) & [`7090278`](https://github.com/shinojacob7/TrustRisk_WDS/commit/7090278)
-- **Description**: The abstract and Section 6 prominently cite the live results from Table 5: 0 Action-tier false alarms (100.0% reduction in automated operational actions), routing 2 of 3 (Policy 4/5) or 3 of 3 (Policy 3) false alarms to the human review queue, preserving 7/7 attacks with mean alert delays of 5.71 h [2.29, 9.57] (Policy 4) and 6.86 h [3.14, 10.57] (Policy 5).
+**Description**: The abstract and Section 6 cite the results from Table 5: zero Action-tier false alarms (100.0% reduction in automated operational actions). Policy 3 routes all 3 false-alarm events to human review, while Policies 4 and 5 each route 2 of 3 false-alarm events to review. All 7 attack events are preserved across the action and review tiers. Mean alert delays are 5.71 h [2.29, 9.57] for Policy 4 and 6.86 h [3.14, 10.57] for Policy 5. Under Policy 4, 1 attack reaches the action tier and 6 reach review; under Policy 5, 2 reach action and 5 reach review.
 - **Verification Command**:
   ```bash
   python -c "import json; d = json.load(open('results/core_triage_experiment.json')); p4 = d['headline_policies'][3]; p5 = d['headline_policies'][4]; print('Policy 4 CI:', p4['bootstrap_ci']['unnecessary_responses_95ci'], 'delay:', p4['bootstrap_ci']['mean_delay_hours_95ci']); print('Policy 5 CI:', p5['bootstrap_ci']['unnecessary_responses_95ci'], 'delay:', p5['bootstrap_ci']['mean_delay_hours_95ci'])"
@@ -192,8 +192,8 @@ In accordance with Section 2 (Phase G) of the Master Prompt and Task 3.6 revisio
 
 ---
 
-### - [x] Criterion 9: Claims-to-Evidence Audit & Independent Verification Sign-Off
-- **Status**: **MET** *(Automated claims testing 49/49 passed; Human governance sign-off tracked in `docs/HUMAN_TODO.md`)*
+### - [ ] Criterion 9: Claims-to-Evidence Audit & Independent Verification Sign-Off
+- **Status**: **PARTIALLY MET** *(Automated claims testing 49/49 passed; independent peer verification sign-off remains pending in `docs/HUMAN_TODO.md`)*
 - **Commits**: [`115e24f`](https://github.com/shinojacob7/TrustRisk_WDS/commit/115e24f), [`3dd983f`](https://github.com/shinojacob7/TrustRisk_WDS/commit/3dd983f), [`22bf601`](https://github.com/shinojacob7/TrustRisk_WDS/commit/22bf601)
 - **Description**: Zero unsupported claims exist in the manuscript. All 49 quantitative claims in `docs/CLAIMS_TO_EVIDENCE.md` are tested directly against pipeline JSON/CSV artifacts. Formal external human referee audit is tracked under Section 5 in `docs/HUMAN_TODO.md`.
 - **Verification Command**:
@@ -214,3 +214,4 @@ In accordance with Section 2 (Phase G) of the Master Prompt and Task 3.6 revisio
 ## Audit Conclusion
 
 All 9 Section 6.1 sign-off criteria are verified and grounded in reproducible code, machine-readable artifacts, and git commits. All links are repo-relative, ensuring complete portability across local clones and CI environments. Zero fabrication, zero test-set hyperparameter tuning, and 100% reproducible execution are verified.
+ 
